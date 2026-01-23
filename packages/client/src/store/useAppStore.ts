@@ -8,6 +8,7 @@ interface AppState {
   request: IRequestData;
   response: IResponseData | null;
   isLoading: boolean;
+  activeUsers: number;
 
   // Basic Actions
   setMethod: (method: HttpMethod) => void;
@@ -16,6 +17,9 @@ interface AppState {
   setResponse: (response: IResponseData | null) => void;
   setLoading: (isLoading: boolean) => void;
   setRequest: (newRequest: IRequestData) => void;
+  setActiveUsers: (count: number) => void;
+  setHeaders: (headers: IKeyValue[]) => void;
+  setQueryParams: (queryParams: IKeyValue[]) => void;
 
   // Header Actions
   addHeader: () => void;
@@ -39,6 +43,7 @@ export const useAppStore = create<AppState>()((set) => ({
   },
   response: null,
   isLoading: false,
+  activeUsers: 0,
 
   setMethod: (method) =>
     set((state) => ({ request: { ...state.request, method } })),
@@ -52,6 +57,14 @@ export const useAppStore = create<AppState>()((set) => ({
   setResponse: (response) => set({ response }),
   setLoading: (isLoading) => set({ isLoading }),
   setRequest: (newRequest) => set({ request: newRequest }),
+  setActiveUsers: (count) => set({ activeUsers: count }),
+
+  setHeaders: (headers) =>
+    set((state) => ({ request: { ...state.request, headers } })),
+
+  setQueryParams: (queryParams) =>
+    set((state) => ({ request: { ...state.request, queryParams } })),
+
 
   addHeader: () => set((state) => ({
     request: { ...state.request,

@@ -4,41 +4,13 @@ import { RequestControls } from "@/components/request-controls"
 import { RequestEditor } from "@/components/request-editor"
 import { ResponseViewer } from "@/components/response-viewer"
 import { useAppStore } from "@/store/useAppStore"
+import { useRoomConnection } from "@/hooks/useRoomConnection"
 
 function App() {
   const [roomId] = useState<string>("example-room-id");
-  const [activeUsers] = useState<number>(3);
-
-  const setResponse = useAppStore((state) => state.setResponse);
-  const setLoading = useAppStore((state) => state.setLoading);
-
-  const handleSendRequest = async () => {
-    const currentRequest = useAppStore.getState().request;
-    console.log("Sending request:", currentRequest);
-    setLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setResponse({
-        status: 200,
-        statusText: "OK",
-        data: {
-          users: [
-            { id: 1, name: "John Doe", email: "john@example.com" },
-            { id: 2, name: "Jane Smith", email: "jane@example.com" },
-          ],
-        },
-        headers: {
-          "content-type": "application/json",
-          "cache-control": "no-cache",
-        },
-        time: 145,
-        size: 2048,
-        timestamp: Date.now(),
-      })
-      setLoading(false)
-    }, 1000)
-  }
-
+  
+  const { sendRequest } = useRoomConnection(roomId);
+  const activeUsers = useAppStore((state) => state.activeUsers);
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -46,12 +18,15 @@ function App() {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <RequestControls
-          onSend={handleSendRequest}
+          roomId={roomId}
+          onSend={sendRequest}
         />
 
         <div className="flex flex-1 overflow-hidden">
           <div className="w-1/2 border-r border-border overflow-hidden">
-            <RequestEditor/>
+            <RequestEditor
+              roomId={roomId}
+            />
           </div>
 
           <div className="w-1/2 overflow-hidden">

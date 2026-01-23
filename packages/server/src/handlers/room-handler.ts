@@ -130,8 +130,8 @@ export const registerRoomHandlers = (io: Server, socket: Socket) => {
     handleUpdateHeaders(socket, roomId, headers);
   });
 
-  socket.on(SOCKET_EVENTS.CLIENT.UPDATE_PARAMS, ({ roomId, params }) => {
-    handleUpdateParams(socket, roomId, params);
+  socket.on(SOCKET_EVENTS.CLIENT.UPDATE_PARAMS, ({ roomId, queryParams }) => {
+    handleUpdateParams(socket, roomId, queryParams);
   });
 
   socket.on(SOCKET_EVENTS.CLIENT.UPDATE_BODY, ({ roomId, body }) => {

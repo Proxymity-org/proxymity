@@ -2,8 +2,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { KeyValueTable } from "@/components/key-value-table"
 import { useAppStore } from "@/store/useAppStore"
 import Editor, { type BeforeMount } from "@monaco-editor/react"
+import { socket } from "@/services/socket"
+import { SOCKET_EVENTS } from "@proxymity/shared"
 
-export function RequestEditor() {
+interface RequestEditorProps {
+  roomId: string;
+}
+
+export function RequestEditor({ roomId }: RequestEditorProps) {
   const handleEditorWillMount: BeforeMount = (monaco) => {
     monaco.editor.defineTheme('proxymity-dark', {
       base: 'vs-dark',
@@ -28,6 +34,42 @@ export function RequestEditor() {
   const removeQueryParam = useAppStore((state) => state.removeQueryParam);
   const updateQueryParam = useAppStore((state) => state.updateQueryParam);
 
+  const emitWithConnection = (event: string, data: any) => {
+    if (socket.connected) {
+      socket.emit(event, data);
+    } else {
+      socket.once('connect', () => {
+        socket.emit(event, data);
+      });
+    }
+  }
+
+  const handleBodyChange = (newBody: string | undefined) => {
+    const bodyContent = newBody || "";
+    setBody(bodyContent);
+    emitWithConnection(SOCKET_EVENTS.CLIENT.UPDATE_BODY, { roomId, body: bodyContent });
+  }
+
+  const handleHeadersChange = (action: () => void) => {
+    try{ 
+      action();
+      const updatedHeaders = useAppStore.getState().request.headers;
+      emitWithConnection(SOCKET_EVENTS.CLIENT.UPDATE_HEADERS, { roomId, headers: updatedHeaders });
+    } catch (error) {
+      console.error("Failed to update headers and emit socket event:", error);
+    }
+  }
+
+  const handleParamsChange = (action: () => void) => {
+    try {
+      action();
+      const updatedParams = useAppStore.getState().request.queryParams;
+      emitWithConnection(SOCKET_EVENTS.CLIENT.UPDATE_PARAMS, { roomId, queryParams: updatedParams });
+    } catch (error) {
+      console.error("Failed to update query parameters and emit socket event:", error);
+    }
+  }
+
   return (
     <div className="flex h-full flex-col">
       <Tabs defaultValue="params" className="flex flex-1 flex-col">
@@ -40,9 +82,9 @@ export function RequestEditor() {
         <TabsContent value="params" className="flex-1 overflow-auto p-6 mt-0">
           <KeyValueTable
             items={queryParams}
-            onAdd={addQueryParam}
-            onUpdate={updateQueryParam}
-            onDelete={removeQueryParam}
+            onAdd={() => handleParamsChange(addQueryParam)}
+            onUpdate={(id, field, value) => handleParamsChange(() => updateQueryParam(id, field, value))}
+            onDelete={(id) => handleParamsChange(() => removeQueryParam(id))}
             placeholder="Query Parameter"
           />
         </TabsContent>
@@ -50,9 +92,9 @@ export function RequestEditor() {
         <TabsContent value="headers" className="flex-1 overflow-auto p-6 mt-0">
           <KeyValueTable
             items={headers}
-            onAdd={addHeader}
-            onUpdate={updateHeader}
-            onDelete={removeHeader}
+            onAdd={() => handleHeadersChange(addHeader)}
+            onUpdate={(id, field, value) => handleHeadersChange(() => updateHeader(id, field, value))}
+            onDelete={(id) => handleHeadersChange(() => removeHeader(id))}
             placeholder="Header"
           />
         </TabsContent>
@@ -66,7 +108,7 @@ export function RequestEditor() {
                 defaultLanguage="json"
                 defaultValue={body}
                 value={body}
-                onChange={(value) => setBody(value || "")}
+                onChange={handleBodyChange}
                 theme="proxymity-dark"
                 beforeMount={handleEditorWillMount}
                 options={{

@@ -25,5 +25,5 @@
 
 ## ✅ Self-Review Checklist
 - [ ] My changes generate no new **ESLint** warnings or **TypeScript** errors.
-- [ ] I have run `npx knip` and verified that I am not introducing unused dependencies or dead code.
+- [ ] I have run `pnpm knip` and verified that I am not introducing unused dependencies or dead code.
 - [ ] I have updated the documentation (if applicable).

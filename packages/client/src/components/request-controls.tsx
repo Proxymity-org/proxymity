@@ -2,10 +2,12 @@ import { Play, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { HttpMethod } from "@proxymity/shared/src/types"
+import { HttpMethod, SOCKET_EVENTS } from "@proxymity/shared"
 import { useAppStore } from "@/store/useAppStore"
+import { socket } from "@/services/socket"
 
 interface RequestControlsProps {
+  roomId: string;
   onSend: () => void
 }
 
@@ -18,18 +20,39 @@ const METHOD_COLORS: Record<HttpMethod, string> = {
 }
 
 
-export function RequestControls({ onSend }: RequestControlsProps) {
+export function RequestControls({ roomId, onSend }: RequestControlsProps) {
   const url = useAppStore((state) => state.request.url);
   const method = useAppStore((state) => state.request.method);
   const isLoading = useAppStore((state) => state.isLoading);
   const setUrl = useAppStore((state) => state.setUrl);
   const setMethod = useAppStore((state) => state.setMethod);
 
+  const emitWithConnection = (event: string, data: any) => {
+    if (socket.connected) {
+      socket.emit(event, data);
+    } else {
+      socket.once('connect', () => {
+        socket.emit(event, data);
+      });
+    }
+  }
+
+  const handleMethodChange = (newMethod: HttpMethod) => {
+    setMethod(newMethod);
+    emitWithConnection(SOCKET_EVENTS.CLIENT.UPDATE_METHOD, { roomId, method: newMethod });
+  }
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUrl = e.target.value;
+    setUrl(newUrl);
+    emitWithConnection(SOCKET_EVENTS.CLIENT.UPDATE_URL, { roomId, url: newUrl });
+  }
+
   return (
     <div className="flex items-center gap-3 border-b border-border bg-card/50 px-6 py-4">
       <Select
         value={method}
-        onValueChange={(value: HttpMethod) => setMethod(value)}
+        onValueChange={handleMethodChange}
       >
         <SelectTrigger className={`w-32 font-semibold ${METHOD_COLORS[method]}`}>
           <SelectValue />
@@ -53,7 +76,7 @@ export function RequestControls({ onSend }: RequestControlsProps) {
         type="url"
         placeholder="https://api.example.com/endpoint"
         value={url}
-        onChange={(e) => setUrl(e.target.value)}
+        onChange={handleUrlChange}
         className="flex-1 font-mono text-sm"
       />
 
