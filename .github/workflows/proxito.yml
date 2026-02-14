@@ -1,0 +1,54 @@
+name: Notificaciones de Proxito
+on:
+  pull_request:
+    types: [review_requested]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar Notificación
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          ACTOR: ${{ github.actor }}
+          REVIEWER_LOGIN: ${{ github.event.requested_reviewer.login }}
+          TEAM_REVIEWER: ${{ github.event.requested_team.name }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          # Determine the reviewer name (user or team)
+          REVIEWER="${REVIEWER_LOGIN:-${TEAM_REVIEWER:-Unknown}}"
+
+          # Construct the JSON payload safely using jq to avoid injection vulnerabilities
+          jq -n \
+            --arg actor "$ACTOR" \
+            --arg pr_url "$PR_URL" \
+            --arg reviewer "$REVIEWER" \
+            --arg pr_title "$PR_TITLE" \
+            '{
+              embeds: [{
+                title: "🚀 ¡Solicitud de revisión para Proxymity!",
+                description: ("¡Hola! He detectado cambios en el código y **" + $actor + "** necesita tu ayuda para revisarlos. \n\n¿Podrías echarle un vistazo para que todo siga funcionando perfecto? ✨"),
+                url: $pr_url,
+                color: 15105570,
+                fields: [
+                  {
+                    name: "🧸 Revisor",
+                    value: ("`" + $reviewer + "`"),
+                    inline: true
+                  },
+                  {
+                    name: "📑 Pull Request",
+                    value: $pr_title,
+                    inline: true
+                  }
+                ],
+                footer: {
+                  text: "Proxito está cuidando de la sala de Proxymity",
+                  "icon_url": "https://em-content.zobj.net/source/apple/391/sparkles_2728.png"
+                }
+              }]
+            }' > payload.json
+
+          # Send the notification, failing if the request fails
+          curl --fail -H "Content-Type: application/json" -d @payload.json "$DISCORD_WEBHOOK_URL"
