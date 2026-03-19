@@ -1,0 +1,24 @@
+{
+  "plugins": [
+    "claude-plugins-official/code-review",
+    "claude-plugins-official/typescript-lsp",
+    "claude-plugins-official/feature-dev",
+    "claude-plugins-official/frontend-design",
+    "claude-plugins-official/security-guidance",
+    "claude-plugins-official/skill-creator"
+  ],
+  "permissions": {
+        "deny": [
+            "Read(.env)",
+            "Read(.env.*)",
+            "Read(**/env)",
+            "Read(**/env.*)",
+            "Read(node_modules)",
+            "Read(**/node_modules)",
+            "Read(**/node_modules/**)",
+            "Bash(rm -rf *)",
+            "Bash(git push --force)",
+            "Bash(git reset --hard)"
+        ]
+    }
+}
