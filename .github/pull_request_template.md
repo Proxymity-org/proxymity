@@ -1,29 +1,29 @@
 ## 📋 Summary
+<!-- What does this PR do and why? 2–4 bullets. If the approach isn't obvious, explain the reasoning here — it saves back-and-forth during review. -->
+<!-- Closes #N -->
+
+-
+
 ## 🛠 Type of Change
-- [ ] 🐛 **Bug fix** (non-breaking change which fixes an issue)
-- [ ] ✨ **New feature** (non-breaking change which adds functionality)
-- [ ] ♻️ **Refactor** (code change that neither fixes a bug nor adds a feature)
-- [ ] 🎨 **UI/UX** (visual changes in Shadcn/Tailwind)
-- [ ] ⚙️ **Config/Chore** (changes to package.json, CI/CD, tooling)
+- [ ] 🐛 Bug fix
+- [ ] ✨ New feature
+- [ ] ♻️ Refactor
+- [ ] 🎨 UI/UX
+- [ ] ⚙️ Config / Chore
+- [ ] 📄 Docs
 
 ## 🔍 How was it tested?
-1. Start the client (`pnpm dev` in client)
-2. Navigate to route `/workspace/...`
-3. Perform action X...
-4. Verify that component Y responds...
+<!-- Specific steps to verify this works. Tailor them to what actually changed: -->
+<!-- client/ → browser steps | server/ → requests or WebSocket events | shared/ → both packages compile -->
 
-## 📸 Visual Evidence (Optional)
+1.
+
+## 📸 Visual Evidence
+<!-- Screenshots or short video for UI changes. Remove this section if not applicable. -->
+
 | Before | After |
 |--------|-------|
-| [Image] | [Image] |
+|  |  |
 
-## 📝 TODO / Pending Technical Debt
-- [ ] Implement Zod validation in the backend for this endpoint.
-- [ ] Move `interface X` types to the shared library `@proxymity/shared`.
-- [ ] Add unit tests for the new utility function.
-- [ ] Resolve the `// TODO` comment left on line 45 of `App.tsx`.
-
-## ✅ Self-Review Checklist
-- [ ] My changes generate no new **ESLint** warnings or **TypeScript** errors.
-- [ ] I have run `pnpm knip` and verified that I am not introducing unused dependencies or dead code.
-- [ ] I have updated the documentation (if applicable).
+## 📝 Pending Technical Debt
+<!-- Intentional TODOs left for future iterations. Remove this section if there are none. -->
