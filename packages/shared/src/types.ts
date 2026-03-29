@@ -24,7 +24,7 @@ export interface IRequestData {
 export interface IResponseData {
   status: number;    // 200, 404, 500
   statusText: string;// "OK", "Not Found"
-  data: any;         // El JSON de respuesta
+  data: unknown;     // El JSON de respuesta
   headers: Record<string, string>;
   time: number;      // Tiempo en ms que tardó
   size: number;      // Tamaño en bytes
@@ -39,3 +39,9 @@ export interface IRoomState {
   activeUsers: number;  // Cuántos devs hay conectados
   isLoading: boolean;   // Si está cargando una petición
 }
+
+// 6. Payload del evento server:broadcast_change
+export type BroadcastChange =
+  | { field: 'method'; value: HttpMethod }
+  | { field: 'url' | 'body'; value: string }
+  | { field: 'headers' | 'queryParams'; value: IKeyValue[] };
