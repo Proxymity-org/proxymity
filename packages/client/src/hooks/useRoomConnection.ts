@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { socket } from "@/services/socket";
-import { SOCKET_EVENTS, IRoomState } from '@proxymity/shared';
+import { SOCKET_EVENTS, IRoomState, IResponseData, BroadcastChange } from '@proxymity/shared';
 import { useAppStore } from "@/store/useAppStore";
 
 export const useRoomConnection = (roomId: string) => {
@@ -28,7 +28,7 @@ export const useRoomConnection = (roomId: string) => {
       setRequest(roomState.request);
     };
 
-    const onBroadcastChange = (updatedData: { field: string, value: any }) => {
+    const onBroadcastChange = (updatedData: BroadcastChange) => {
       console.log("Received broadcasted change:", updatedData);
       switch (updatedData.field) {
         case 'method': setMethod(updatedData.value); break;
@@ -36,8 +36,9 @@ export const useRoomConnection = (roomId: string) => {
         case 'body': setBody(updatedData.value); break;
         case 'headers': setHeaders(updatedData.value); break;
         case 'queryParams': setQueryParams(updatedData.value); break;
-        default: 
-          console.warn(`Unknown field broadcasted from server: ${updatedData.field}`);
+        default:
+          const exhaustiveCheck: never = updatedData;
+          console.warn(`Unknown field broadcasted from server: ${exhaustiveCheck}`);
           break;
       }
     };
@@ -46,7 +47,7 @@ export const useRoomConnection = (roomId: string) => {
       setLoading(true);
     }
 
-    const onRequestComplete = (response: any) => {
+    const onRequestComplete = (response: IResponseData) => {
       setResponse(response);
       setLoading(false);
     }
