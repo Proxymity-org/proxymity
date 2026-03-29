@@ -43,11 +43,12 @@ export function ResponseViewer() {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
   }
 
-  const handleCopy = async () => {
-    if (response.data === undefined || response.data === null) return
+  const serializeData = (data: unknown): string =>
+    JSON.stringify(data, null, 2) ?? 'undefined';
 
+  const handleCopy = async () => {
     try {
-      const content = JSON.stringify(response.data as object | string | number | boolean | null, null, 2)
+      const content = serializeData(response.data)
       await navigator.clipboard.writeText(content)
       setIsCopied(true)
       
@@ -103,7 +104,7 @@ export function ResponseViewer() {
             }}
             wrapLongLines={true}
           >
-            {JSON.stringify(response.data as object | string | number | boolean | null, null, 2)}
+            {serializeData(response.data)}
           </SyntaxHighlighter>
         </div>
       </div>
