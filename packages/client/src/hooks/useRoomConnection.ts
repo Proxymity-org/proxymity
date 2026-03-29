@@ -36,10 +36,11 @@ export const useRoomConnection = (roomId: string) => {
         case 'body': setBody(updatedData.value); break;
         case 'headers': setHeaders(updatedData.value); break;
         case 'queryParams': setQueryParams(updatedData.value); break;
-        default:
-          const exhaustiveCheck: never = updatedData;
-          console.warn(`Unknown field broadcasted from server: ${exhaustiveCheck}`);
+        default: {
+          const _unexpectedData: unknown = updatedData;
+          console.warn('Unknown field broadcasted from server:', _unexpectedData);
           break;
+        }
       }
     };
 
