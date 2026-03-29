@@ -44,7 +44,7 @@ export function ResponseViewer() {
   }
 
   const handleCopy = async () => {
-    if (!response.data) return
+    if (response.data === undefined || response.data === null) return
 
     try {
       const content = JSON.stringify(response.data as object | string | number | boolean | null, null, 2)
