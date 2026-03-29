@@ -27,7 +27,7 @@ export function RequestControls({ roomId, onSend }: RequestControlsProps) {
   const setUrl = useAppStore((state) => state.setUrl);
   const setMethod = useAppStore((state) => state.setMethod);
 
-  const emitWithConnection = (event: string, data: any) => {
+  const emitWithConnection = (event: string, data: unknown) => {
     if (socket.connected) {
       socket.emit(event, data);
     } else {
