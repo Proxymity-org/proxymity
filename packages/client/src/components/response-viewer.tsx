@@ -47,7 +47,7 @@ export function ResponseViewer() {
     if (!response.data) return
 
     try {
-      const content = JSON.stringify(response.data, null, 2)
+      const content = JSON.stringify(response.data as object | string | number | boolean | null, null, 2)
       await navigator.clipboard.writeText(content)
       setIsCopied(true)
       
@@ -103,7 +103,7 @@ export function ResponseViewer() {
             }}
             wrapLongLines={true}
           >
-            {JSON.stringify(response.data, null, 2)}
+            {JSON.stringify(response.data as object | string | number | boolean | null, null, 2)}
           </SyntaxHighlighter>
         </div>
       </div>
