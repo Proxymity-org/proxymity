@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 
 import { registerRequestHandlers } from './handlers/request-handler';
 import { registerRoomHandlers } from './handlers/room-handler';
+import { registerPresenceHandlers } from './handlers/presence-handler';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ io.on('connection', (socket) => {
 
   registerRoomHandlers(io, socket);
   registerRequestHandlers(io, socket);
+  registerPresenceHandlers(io, socket);
 
   socket.on('disconnect', (reason) => {
     console.log(`[Socket] Client disconnected: ${socket.id} (Reason: ${reason})`);
