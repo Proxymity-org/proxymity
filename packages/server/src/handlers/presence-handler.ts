@@ -33,4 +33,11 @@ export const registerPresenceHandlers = (io: Server, socket: Socket) => {
       });
     }
   );
+
+  socket.on('disconnect', () => {
+    const roomId = socket.data.roomId as string | undefined;
+    if (roomId) {
+      socket.to(roomId).emit(SOCKET_EVENTS.SERVER.CURSOR_REMOVED, { userId: socket.id });
+    }
+  });
 };

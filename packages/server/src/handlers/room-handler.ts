@@ -77,7 +77,6 @@ const handleDisconnecting = (io: Server, socket: Socket) => {
       stateStore.updateUserCount(roomId, newCount);
 
       io.to(roomId).emit(SOCKET_EVENTS.SERVER.USER_COUNT, newCount);
-      io.to(roomId).emit(SOCKET_EVENTS.SERVER.CURSOR_REMOVED, { userId: socket.id });
     }
   }
 };

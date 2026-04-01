@@ -71,25 +71,23 @@ export function CursorOverlay() {
   useEffect(() => {
     const prev = prevRef.current;
     const removed = Object.keys(prev).filter((id) => !presenceCursors[id]);
-
-    if (removed.length > 0) {
-      const toFade: Record<string, ICursorPosition> = {};
-      removed.forEach((id) => { toFade[id] = prev[id]; });
-      setFadingCursors((f) => ({ ...f, ...toFade }));
-
-      const timer = setTimeout(() => {
-        setFadingCursors((f) => {
-          const next = { ...f };
-          removed.forEach((id) => delete next[id]);
-          return next;
-        });
-      }, 420);
-
-      prevRef.current = presenceCursors;
-      return () => clearTimeout(timer);
-    }
-
     prevRef.current = presenceCursors;
+
+    if (removed.length === 0) return;
+
+    const toFade: Record<string, ICursorPosition> = {};
+    removed.forEach((id) => { toFade[id] = prev[id]; });
+    setFadingCursors((f) => ({ ...f, ...toFade }));
+
+    const timer = setTimeout(() => {
+      setFadingCursors((f) => {
+        const next = { ...f };
+        removed.forEach((id) => delete next[id]);
+        return next;
+      });
+    }, 420);
+
+    return () => clearTimeout(timer);
   }, [presenceCursors]);
 
   const activeCursors = Object.values(presenceCursors);
