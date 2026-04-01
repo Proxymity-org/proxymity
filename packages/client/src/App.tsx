@@ -5,15 +5,19 @@ import { RequestEditor } from "@/components/request-editor"
 import { ResponseViewer } from "@/components/response-viewer"
 import { useAppStore } from "@/store/useAppStore"
 import { useRoomConnection } from "@/hooks/useRoomConnection"
+import { CursorOverlay } from "@/components/CursorOverlay"
+import { usePresence } from "@/hooks/usePresence"
 
 function App() {
   const [roomId] = useState<string>("example-room-id");
   
   const { sendRequest } = useRoomConnection(roomId);
+  usePresence(roomId);
   const activeUsers = useAppStore((state) => state.activeUsers);
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div id="app-root" className="flex h-screen flex-col bg-background">
+      <CursorOverlay />
       <WorkspaceHeader roomId={roomId} activeUsers={activeUsers} />
 
       <div className="flex flex-1 flex-col overflow-hidden">
