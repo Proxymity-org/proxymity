@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 
-import { IRequestData, IResponseData, HttpMethod, IKeyValue } from "@proxymity/shared";
+import type { IRequestData, IResponseData, HttpMethod, IKeyValue, ICursorPosition, IEditorCursor, IPresenceUser } from "@proxymity/shared";
 
 interface AppState {
   // State
@@ -9,6 +9,17 @@ interface AppState {
   response: IResponseData | null;
   isLoading: boolean;
   activeUsers: number;
+
+  // Presence
+  presenceCursors: Record<string, ICursorPosition>;
+  editorCursors: Record<string, IEditorCursor>;
+  myIdentity: IPresenceUser | null;
+
+  setPresenceCursor: (cursor: ICursorPosition) => void;
+  removePresenceCursor: (userId: string) => void;
+  setEditorCursor: (cursor: IEditorCursor) => void;
+  removeEditorCursor: (userId: string) => void;
+  setMyIdentity: (user: IPresenceUser) => void;
 
   // Basic Actions
   setMethod: (method: HttpMethod) => void;
@@ -44,6 +55,35 @@ export const useAppStore = create<AppState>()((set) => ({
   response: null,
   isLoading: false,
   activeUsers: 0,
+  presenceCursors: {},
+  editorCursors: {},
+  myIdentity: null,
+
+  setPresenceCursor: (cursor) =>
+    set((state) => ({
+      presenceCursors: { ...state.presenceCursors, [cursor.userId]: cursor },
+    })),
+
+  removePresenceCursor: (userId) =>
+    set((state) => {
+      const next = { ...state.presenceCursors };
+      delete next[userId];
+      return { presenceCursors: next };
+    }),
+
+  setEditorCursor: (cursor) =>
+    set((state) => ({
+      editorCursors: { ...state.editorCursors, [cursor.userId]: cursor },
+    })),
+
+  removeEditorCursor: (userId) =>
+    set((state) => {
+      const next = { ...state.editorCursors };
+      delete next[userId];
+      return { editorCursors: next };
+    }),
+
+  setMyIdentity: (user) => set({ myIdentity: user }),
 
   setMethod: (method) =>
     set((state) => ({ request: { ...state.request, method } })),
