@@ -31,7 +31,15 @@ export interface IResponseData {
   timestamp: number; // Cuándo ocurrió
 }
 
-// 5. El Estado Completo de la Sala
+// 5. Error del servidor
+export type ServerErrorCode = 'proxy_error' | 'room_error';
+
+export interface IServerError {
+  message: string;
+  code: ServerErrorCode;
+}
+
+// 6. El Estado Completo de la Sala
 export interface IRoomState {
   id: string;           // ID de la sala (ej: "room-abc")
   request: IRequestData;

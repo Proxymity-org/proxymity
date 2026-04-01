@@ -104,7 +104,7 @@ export const registerRoomHandlers = (io: Server, socket: Socket) => {
   socket.on(SOCKET_EVENTS.CLIENT.JOIN_ROOM, (roomId: string) => {
     if (!roomId || typeof roomId !== 'string' || roomId.trim() === '') {
       console.warn(`[RoomHandler] Invalid roomId received from ${socket.id}`);
-      socket.emit(SOCKET_EVENTS.SERVER.ERROR, { message: "Invalid Room ID" });
+      socket.emit(SOCKET_EVENTS.SERVER.ERROR, { message: "Invalid Room ID", code: 'room_error' });
       return;
     }
     handleJoinRoom(io, socket, roomId);

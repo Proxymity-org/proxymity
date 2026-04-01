@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { IRequestData, IResponseData, IKeyValue } from '@proxymity/shared';
 
 /**
@@ -58,30 +58,12 @@ const createSuccessResponse = (
 });
 
 
-const createErrorResponse = (
-  error: unknown, 
-  durationMs: number
-): IResponseData => {
-  const isAxiosError = error instanceof AxiosError;
-  
-  return {
-    status: isAxiosError && error.response ? error.response.status : 0,
-    statusText: isAxiosError ? error.message : 'Unknown Internal Error',
-    data: isAxiosError && error.response ? error.response.data : null,
-    headers: {},
-    time: durationMs,
-    size: 0,
-    timestamp: Date.now(),
-  };
-};
-
-
 export const executeRequest = async (requestData: IRequestData): Promise<IResponseData> => {
   const startTime = Date.now();
 
   // Basic security check to prevent SSRF to localhost
   if (requestData.url.includes('localhost') || requestData.url.includes('127.0.0.1')) {
-     return createErrorResponse(new Error('Access to local resources is forbidden'), 0);
+    throw new Error('Access to local resources is forbidden');
   }
 
   const config: AxiosRequestConfig = {
@@ -91,13 +73,9 @@ export const executeRequest = async (requestData: IRequestData): Promise<IRespon
     params: mapHeadersToRecord(requestData.queryParams),
     data: parseRequestBody(requestData.body),
     validateStatus: () => true,
-    timeout: 10000, 
+    timeout: 10000,
   };
 
-  try {
-    const axiosResponse = await axios(config);
-    return createSuccessResponse(axiosResponse, Date.now() - startTime);
-  } catch (error) {
-    return createErrorResponse(error, Date.now() - startTime);
-  }
+  const axiosResponse = await axios(config);
+  return createSuccessResponse(axiosResponse, Date.now() - startTime);
 };

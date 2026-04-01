@@ -29,8 +29,10 @@ const handleExecuteRequest = async (
     console.error(`[CRITICAL] Error executing request for room ${roomId}:`, criticalError);
     stateStore.setLoading(roomId, false);
     
-    io.to(roomId).emit(SOCKET_EVENTS.SERVER.ERROR, { 
-      message: 'Internal Proxy Error. Please try again.' 
+    const message = criticalError instanceof Error ? criticalError.message : 'Internal Proxy Error';
+    io.to(roomId).emit(SOCKET_EVENTS.SERVER.ERROR, {
+      message,
+      code: 'proxy_error'
     });
   }
 };

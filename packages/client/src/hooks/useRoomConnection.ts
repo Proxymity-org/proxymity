@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { socket } from "@/services/socket";
-import { SOCKET_EVENTS, IRoomState } from '@proxymity/shared';
+import { SOCKET_EVENTS, IRoomState, IServerError } from '@proxymity/shared';
 import { useAppStore } from "@/store/useAppStore";
 
 export const useRoomConnection = (roomId: string) => {
@@ -13,6 +13,7 @@ export const useRoomConnection = (roomId: string) => {
   const setActiveUsers = useAppStore((state) => state.setActiveUsers);
   const setHeaders = useAppStore((state) => state.setHeaders);
   const setQueryParams = useAppStore((state) => state.setQueryParams);
+  const setServerError = useAppStore((state) => state.setServerError);
 
   useEffect(() => {
     const onConnect = () => {
@@ -24,12 +25,10 @@ export const useRoomConnection = (roomId: string) => {
     };
 
     const onSyncState = (roomState: IRoomState) => {
-      console.log("Received state from server:", roomState);
       setRequest(roomState.request);
     };
 
     const onBroadcastChange = (updatedData: { field: string, value: any }) => {
-      console.log("Received broadcasted change:", updatedData);
       switch (updatedData.field) {
         case 'method': setMethod(updatedData.value); break;
         case 'url': setUrl(updatedData.value); break;
@@ -44,6 +43,7 @@ export const useRoomConnection = (roomId: string) => {
 
     const onRequestStarted = () => {
       setLoading(true);
+      setServerError(null);
     }
 
     const onRequestComplete = (response: any) => {
@@ -55,6 +55,11 @@ export const useRoomConnection = (roomId: string) => {
       setActiveUsers(count);
     }
 
+    const onServerError = (error: IServerError) => {
+      setLoading(false);
+      setServerError(error);
+    }
+
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on(SOCKET_EVENTS.SERVER.SYNC_STATE, onSyncState);
@@ -62,6 +67,7 @@ export const useRoomConnection = (roomId: string) => {
     socket.on(SOCKET_EVENTS.SERVER.REQUEST_STARTED, onRequestStarted);
     socket.on(SOCKET_EVENTS.SERVER.REQUEST_COMPLETE, onRequestComplete);
     socket.on(SOCKET_EVENTS.SERVER.USER_COUNT, onUserCount);
+    socket.on(SOCKET_EVENTS.SERVER.ERROR, onServerError);
 
     if (socket.connected) {
       onConnect();
@@ -75,16 +81,14 @@ export const useRoomConnection = (roomId: string) => {
       socket.off(SOCKET_EVENTS.SERVER.REQUEST_STARTED, onRequestStarted);
       socket.off(SOCKET_EVENTS.SERVER.REQUEST_COMPLETE, onRequestComplete);
       socket.off(SOCKET_EVENTS.SERVER.USER_COUNT, onUserCount);
+      socket.off(SOCKET_EVENTS.SERVER.ERROR, onServerError);
       if (socket.connected) {
         socket.emit(SOCKET_EVENTS.CLIENT.LEAVE_ROOM, roomId);
       }
     };
-  }, [roomId, setRequest, setMethod, setUrl, setBody, setHeaders, setQueryParams, setResponse, setLoading, setActiveUsers]);
+  }, [roomId, setRequest, setMethod, setUrl, setBody, setHeaders, setQueryParams, setResponse, setLoading, setActiveUsers, setServerError]);
 
   const sendRequest = () => {
-    const currentRequest = useAppStore.getState().request;
-    console.log("Sending request:", currentRequest);
-    console.log(roomId);
     socket.emit(SOCKET_EVENTS.CLIENT.EXECUTE_REQUEST, { roomId });
   };
 

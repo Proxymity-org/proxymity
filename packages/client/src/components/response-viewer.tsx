@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Loader2, Copy, Check } from "lucide-react"
+import { Loader2, Copy, Check, AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -10,6 +10,7 @@ export function ResponseViewer() {
     const [isCopied, setIsCopied] = useState(false)
     const isLoading = useAppStore((state) => state.isLoading);
     const response = useAppStore((state) => state.response);
+    const serverError = useAppStore((state) => state.serverError);
   
     if (isLoading) {
     return (
@@ -17,6 +18,18 @@ export function ResponseViewer() {
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           <p className="text-sm text-muted-foreground">Sending request...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (serverError) {
+    return (
+      <div className="flex h-full items-center justify-center p-6">
+        <div className="flex max-w-md flex-col items-center gap-3 text-center">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+          <p className="text-sm font-medium text-red-500">Request failed</p>
+          <p className="text-sm text-muted-foreground">{serverError.message}</p>
         </div>
       </div>
     )
