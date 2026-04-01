@@ -1,9 +1,21 @@
+import { useEffect, useRef } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { KeyValueTable } from "@/components/key-value-table"
 import { useAppStore } from "@/store/useAppStore"
-import Editor, { type BeforeMount } from "@monaco-editor/react"
+import Editor, { type BeforeMount, type OnMount, type Monaco } from "@monaco-editor/react"
 import { socket } from "@/services/socket"
 import { SOCKET_EVENTS } from "@proxymity/shared"
+import type { IEditorCursor } from "@proxymity/shared"
+
+type MonacoEditor = Parameters<OnMount>[0];
+type IContentWidget = Parameters<MonacoEditor['addContentWidget']>[0];
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 interface RequestEditorProps {
   roomId: string;
@@ -33,6 +45,109 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
   const addQueryParam = useAppStore((state) => state.addQueryParam);
   const removeQueryParam = useAppStore((state) => state.removeQueryParam);
   const updateQueryParam = useAppStore((state) => state.updateQueryParam);
+
+  const editorCursors = useAppStore((state) => state.editorCursors);
+  const editorRef = useRef<MonacoEditor | null>(null);
+  const monacoRef = useRef<Monaco | null>(null);
+  const widgetsRef = useRef<Map<string, IContentWidget>>(new Map());
+  const editorRafRef = useRef<number | null>(null);
+
+  const handleEditorMount: OnMount = (editor, monacoInstance) => {
+    editorRef.current = editor;
+    monacoRef.current = monacoInstance;
+
+    editor.onDidChangeCursorPosition((e) => {
+      if (editorRafRef.current !== null) return;
+      editorRafRef.current = requestAnimationFrame(() => {
+        emitWithConnection(SOCKET_EVENTS.CLIENT.EDITOR_CURSOR_CHANGE, {
+          roomId,
+          lineNumber: e.position.lineNumber,
+          column: e.position.column,
+        });
+        editorRafRef.current = null;
+      });
+    });
+  };
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const monacoInstance = monacoRef.current;
+    if (!monacoInstance) return;
+
+    const currentIds = new Set(Object.keys(editorCursors));
+    const existingIds = new Set(widgetsRef.current.keys());
+
+    // Remove widgets for users who left
+    existingIds.forEach((id) => {
+      if (!currentIds.has(id)) {
+        editor.removeContentWidget(widgetsRef.current.get(id)!);
+        widgetsRef.current.delete(id);
+      }
+    });
+
+    // Add or update widgets for current users
+    currentIds.forEach((id) => {
+      const cursor: IEditorCursor = editorCursors[id];
+
+      // Remove old widget for this user before re-adding at new position
+      if (widgetsRef.current.has(id)) {
+        editor.removeContentWidget(widgetsRef.current.get(id)!);
+      }
+
+      const domNode = document.createElement('div');
+      domNode.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;pointer-events:none;';
+
+      const label = document.createElement('div');
+      label.textContent = cursor.username;
+      label.style.cssText = `
+        background-color: ${hexToRgba(cursor.color, 0.12)};
+        border: 1px solid ${hexToRgba(cursor.color, 0.28)};
+        color: ${cursor.color};
+        border-radius: 3px;
+        padding: 0 5px;
+        font-size: 10px;
+        font-family: "JetBrains Mono", monospace;
+        white-space: nowrap;
+        line-height: 16px;
+        margin-bottom: 1px;
+      `;
+
+      const line = document.createElement('div');
+      line.style.cssText = `
+        width: 2px;
+        height: 18px;
+        background-color: ${cursor.color};
+        opacity: 0.8;
+      `;
+
+      domNode.appendChild(label);
+      domNode.appendChild(line);
+
+      const widget: IContentWidget = {
+        getId: () => `presence-cursor-${id}`,
+        getDomNode: () => domNode,
+        getPosition: () => ({
+          position: { lineNumber: cursor.lineNumber, column: cursor.column },
+          preference: [monacoInstance.editor.ContentWidgetPositionPreference.EXACT],
+        }),
+      };
+
+      editor.addContentWidget(widget);
+      widgetsRef.current.set(id, widget);
+    });
+  }, [editorCursors]);
+
+  useEffect(() => {
+    return () => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      widgetsRef.current.forEach((widget) => editor.removeContentWidget(widget));
+      widgetsRef.current.clear();
+      if (editorRafRef.current !== null) cancelAnimationFrame(editorRafRef.current);
+    };
+  }, []);
 
   const emitWithConnection = (event: string, data: any) => {
     if (socket.connected) {
@@ -111,6 +226,7 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
                 onChange={handleBodyChange}
                 theme="proxymity-dark"
                 beforeMount={handleEditorWillMount}
+                onMount={handleEditorMount}
                 options={{
                   minimap: { enabled: false },
                   fontSize: 14,
