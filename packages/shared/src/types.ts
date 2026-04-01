@@ -39,3 +39,22 @@ export interface IRoomState {
   activeUsers: number;  // Cuántos devs hay conectados
   isLoading: boolean;   // Si está cargando una petición
 }
+
+// 7. Presence / Collaborative cursors
+
+export interface IPresenceUser {
+  userId: string;    // socket.id — source of truth for identity
+  username: string;  // "swift-falcon" — display label only
+  color: string;     // "#3D8F82" — hex color assigned on join
+}
+
+export interface ICursorPosition extends IPresenceUser {
+  x: number;         // 0–1, fraction of app container width
+  y: number;         // 0–1, fraction of app container height
+  updatedAt: number; // Date.now() — used for 3s inactivity eviction
+}
+
+export interface IEditorCursor extends IPresenceUser {
+  lineNumber: number;
+  column: number;
+}
