@@ -1,38 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=BBH+Bartle&family=Geist:wght@100..900&display=swap');
 @import "tailwindcss";
 
-
 @theme {
-  --font-sans: "Geist", sans-serif;
-  --font-mono: "Geist Mono", monospace;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-display: "DM Serif Display", serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  /* Minerale palette */
+  --color-min-teal: #3D8F82;
+  --color-min-success: #4A9E6E;
+  --color-min-error:   #B06060;
+  --color-min-info:    #5A8FC0;
+  --color-min-gold:    #B08840;
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -40,75 +38,137 @@
 }
 
 :root {
-  --background: oklch(0.985 0 0);
-  --foreground: oklch(0.145 0 0);
+  color-scheme: dark;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --background: #0D0F10;
+  --foreground: #E8EDF0;
 
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --card: #141618;
+  --card-foreground: #E8EDF0;
 
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --popover: #1A1D20;
+  --popover-foreground: #E8EDF0;
 
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --primary: #3D8F82;
+  --primary-foreground: #0D0F10;
 
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
+  --secondary: #1A1D20;
+  --secondary-foreground: #E8EDF0;
 
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.205 0 0);
+  --muted: #181B1E;
+  --muted-foreground: #6B7880;
 
-  --radius: 0.5rem;
+  --accent: #252930;
+  --accent-foreground: #E8EDF0;
+
+  --destructive: #B06060;
+  --destructive-foreground: #E8EDF0;
+
+  --border: #252930;
+  --input: #181B1E;
+  --ring: rgba(61, 143, 130, 0.38);
+
+  --radius: 0.375rem;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-
-    --card: oklch(0.17 0 0);
-    --card-foreground: oklch(0.985 0 0);
-
-    --popover: oklch(0.17 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.145 0 0);
-
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-
-    --destructive: oklch(0.396 0.141 25.723);
-    --destructive-foreground: oklch(0.985 0 0);
-
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
-  }
-}
-
 
 @layer base {
   *, ::after, ::before {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: "IBM Plex Sans", sans-serif;
+    position: relative;
+  }
+
+  /* Precision dot grid overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+    z-index: 9999;
   }
 }
+
+/* ─── Animations ─────────────────────────────────────── */
+
+@keyframes min-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes min-teal-breath {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 0.95; transform: scale(1.2); }
+}
+
+@keyframes min-teal-scan {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.min-page-enter {
+  animation: min-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.min-page-enter-2 {
+  animation: min-fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
+}
+
+.min-response-enter {
+  animation: min-fade-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.min-teal-breath {
+  animation: min-teal-breath 3s ease-in-out infinite;
+}
+
+/* ─── Tab overrides ──────────────────────────────────── */
+
+[data-slot="tabs-list"] {
+  background: transparent !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  gap: 0 !important;
+  padding: 0 1.5rem !important;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-slot="tabs-trigger"] {
+  font-family: "IBM Plex Sans", sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+  color: var(--muted-foreground) !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  padding: 0.6rem 0.875rem !important;
+  border-bottom: 1.5px solid transparent;
+  margin-bottom: -1px;
+  box-shadow: none !important;
+  transition: color 0.12s ease, border-color 0.12s ease !important;
+}
+
+[data-slot="tabs-trigger"]:hover {
+  color: var(--foreground) !important;
+  background: transparent !important;
+}
+
+[data-slot="tabs-trigger"][data-state="active"] {
+  color: var(--foreground) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom-color: #3D8F82 !important;
+  font-weight: 500 !important;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #252930; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #30353C; }
