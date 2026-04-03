@@ -16,10 +16,20 @@ function App() {
 
   if (serverError?.code === 'room_error') {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-background">
-        <AlertTriangle className="h-10 w-10 text-red-500" />
-        <h2 className="text-base font-semibold">Could not join room</h2>
-        <p className="text-sm text-muted-foreground">{serverError.message}</p>
+      <div className="flex h-screen flex-col items-center justify-center gap-3 bg-background min-page-enter">
+        <AlertTriangle className="h-6 w-6" style={{ color: '#B08840', opacity: 0.75 }} />
+        <h2
+          className="text-lg tracking-wide text-foreground"
+          style={{ fontFamily: '"DM Serif Display", serif' }}
+        >
+          Could not join room
+        </h2>
+        <p
+          className="text-xs"
+          style={{ color: '#6B7880', fontFamily: '"JetBrains Mono", monospace' }}
+        >
+          {serverError.message}
+        </p>
       </div>
     )
   }
