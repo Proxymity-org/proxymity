@@ -15,7 +15,10 @@ export const useRoomConnection = (roomId: string) => {
 
     const onSyncState = (roomState: IRoomState) => {
       console.log("Received state from server:", roomState);
-      useAppStore.getState().setRequest(roomState.request);
+      const store = useAppStore.getState();
+      store.setRequest(roomState.request);
+      store.setLoading(roomState.isLoading);
+      store.setResponse(roomState.response);
     };
 
     const onBroadcastChange = (updatedData: { field: string, value: any }) => {
