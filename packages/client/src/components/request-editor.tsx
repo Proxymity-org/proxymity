@@ -2,8 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { KeyValueTable } from "@/components/key-value-table"
 import { useAppStore } from "@/store/useAppStore"
 import Editor, { type BeforeMount } from "@monaco-editor/react"
-import { socket } from "@/services/socket"
 import { SOCKET_EVENTS } from "@proxymity/shared"
+import { useSocketEmit } from "@/hooks/useSocketEmit"
 
 interface RequestEditorProps {
   roomId: string;
@@ -34,15 +34,7 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
   const removeQueryParam = useAppStore((state) => state.removeQueryParam);
   const updateQueryParam = useAppStore((state) => state.updateQueryParam);
 
-  const emitWithConnection = (event: string, data: any) => {
-    if (socket.connected) {
-      socket.emit(event, data);
-    } else {
-      socket.once('connect', () => {
-        socket.emit(event, data);
-      });
-    }
-  }
+  const emitWithConnection = useSocketEmit();
 
   const handleBodyChange = (newBody: string | undefined) => {
     const bodyContent = newBody || "";

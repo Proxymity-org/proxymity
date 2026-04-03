@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { HttpMethod, SOCKET_EVENTS } from "@proxymity/shared"
 import { useAppStore } from "@/store/useAppStore"
-import { socket } from "@/services/socket"
+import { useSocketEmit } from "@/hooks/useSocketEmit"
 
 interface RequestControlsProps {
   roomId: string;
@@ -27,15 +27,7 @@ export function RequestControls({ roomId, onSend }: RequestControlsProps) {
   const setUrl = useAppStore((state) => state.setUrl);
   const setMethod = useAppStore((state) => state.setMethod);
 
-  const emitWithConnection = (event: string, data: any) => {
-    if (socket.connected) {
-      socket.emit(event, data);
-    } else {
-      socket.once('connect', () => {
-        socket.emit(event, data);
-      });
-    }
-  }
+  const emitWithConnection = useSocketEmit();
 
   const handleMethodChange = (newMethod: HttpMethod) => {
     setMethod(newMethod);
