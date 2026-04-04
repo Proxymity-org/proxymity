@@ -43,8 +43,10 @@ export function ResponseViewer() {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`
   }
 
-  const serializeData = (data: unknown): string =>
-    JSON.stringify(data, null, 2) ?? 'undefined';
+  const serializeData = (data: unknown): string => {
+    if (data === undefined || data === '') return '';
+    return JSON.stringify(data, null, 2);
+  };
 
   const handleCopy = async () => {
     try {
