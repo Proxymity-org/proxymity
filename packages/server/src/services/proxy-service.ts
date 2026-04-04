@@ -24,9 +24,10 @@ const parseRequestBody = (bodyStr: string): unknown | undefined => {
   }
 };
 
-const calculateResponseSize = (headers: Record<string, any>, data: any): number => {
-  if (headers['content-length']) {
-    const parsed = parseInt(headers['content-length'], 10);
+const calculateResponseSize = (headers: Record<string, unknown>, data: unknown): number => {
+  const contentLength = headers['content-length'];
+  if (typeof contentLength === 'string') {
+    const parsed = parseInt(contentLength, 10);
     if (!isNaN(parsed)) return parsed;
   }
 

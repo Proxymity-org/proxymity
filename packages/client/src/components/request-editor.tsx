@@ -34,7 +34,7 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
   const removeQueryParam = useAppStore((state) => state.removeQueryParam);
   const updateQueryParam = useAppStore((state) => state.updateQueryParam);
 
-  const emitWithConnection = (event: string, data: any) => {
+  const emitWithConnection = (event: string, data: unknown) => {
     if (socket.connected) {
       socket.emit(event, data);
     } else {
