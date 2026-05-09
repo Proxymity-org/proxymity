@@ -20,6 +20,6 @@ export const SOCKET_EVENTS = {
     BROADCAST_CHANGE: 'server:broadcast_change', 
     REQUEST_STARTED: 'server:request_started',   // "Loading..."
     REQUEST_COMPLETE: 'server:request_complete', // Payload: IResponseData
-    ERROR: 'server:error'                        // Payload: { message: string }
+    ERROR: 'server:error'                        // Payload: IServerError
   }
 } as const;

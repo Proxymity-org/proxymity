@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 
-import { IRequestData, IResponseData, HttpMethod, IKeyValue } from "@proxymity/shared";
+import { IRequestData, IResponseData, IServerError, HttpMethod, IKeyValue } from "@proxymity/shared";
 
 interface AppState {
   // State
@@ -9,6 +9,7 @@ interface AppState {
   response: IResponseData | null;
   isLoading: boolean;
   activeUsers: number;
+  serverError: IServerError | null;
 
   // Basic Actions
   setMethod: (method: HttpMethod) => void;
@@ -16,6 +17,7 @@ interface AppState {
   setBody: (body: string) => void;
   setResponse: (response: IResponseData | null) => void;
   setLoading: (isLoading: boolean) => void;
+  setServerError: (serverError: IServerError | null) => void;
   setRequest: (newRequest: IRequestData) => void;
   setActiveUsers: (count: number) => void;
   setHeaders: (headers: IKeyValue[]) => void;
@@ -44,6 +46,7 @@ export const useAppStore = create<AppState>()((set) => ({
   response: null,
   isLoading: false,
   activeUsers: 0,
+  serverError: null,
 
   setMethod: (method) =>
     set((state) => ({ request: { ...state.request, method } })),
@@ -56,6 +59,7 @@ export const useAppStore = create<AppState>()((set) => ({
 
   setResponse: (response) => set({ response }),
   setLoading: (isLoading) => set({ isLoading }),
+  setServerError: (serverError) => set({ serverError }),
   setRequest: (newRequest) => set({ request: newRequest }),
   setActiveUsers: (count) => set({ activeUsers: count }),
 
