@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { HttpMethod, SOCKET_EVENTS } from "@proxymity/shared"
 import { useAppStore } from "@/store/useAppStore"
-import { socket } from "@/services/socket"
+import { useSocketEmit } from "@/hooks/useSocketEmit"
+import { useSocketConnected } from "@/hooks/useSocketConnected"
 
 interface RequestControlsProps {
   roomId: string;
@@ -27,15 +28,8 @@ export function RequestControls({ roomId, onSend }: RequestControlsProps) {
   const setUrl = useAppStore((state) => state.setUrl);
   const setMethod = useAppStore((state) => state.setMethod);
 
-  const emitWithConnection = (event: string, data: any) => {
-    if (socket.connected) {
-      socket.emit(event, data);
-    } else {
-      socket.once('connect', () => {
-        socket.emit(event, data);
-      });
-    }
-  }
+  const isConnected = useSocketConnected();
+  const emitWithConnection = useSocketEmit();
 
   const handleMethodChange = (newMethod: HttpMethod) => {
     setMethod(newMethod);
@@ -53,6 +47,7 @@ export function RequestControls({ roomId, onSend }: RequestControlsProps) {
       <Select
         value={method}
         onValueChange={handleMethodChange}
+        disabled={!isConnected}
       >
         <SelectTrigger className={`w-32 font-semibold ${METHOD_COLORS[method]}`}>
           <SelectValue />
@@ -78,9 +73,10 @@ export function RequestControls({ roomId, onSend }: RequestControlsProps) {
         value={url}
         onChange={handleUrlChange}
         className="flex-1 font-mono text-sm"
+        disabled={!isConnected}
       />
 
-      <Button onClick={onSend} disabled={isLoading} className="gap-2 min-w-28" size="default">
+      <Button onClick={onSend} disabled={!isConnected || isLoading} className="gap-2 min-w-28" size="default">
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" /> // Loading spinner
         ) : (
