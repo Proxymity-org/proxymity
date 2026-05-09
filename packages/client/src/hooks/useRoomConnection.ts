@@ -4,16 +4,6 @@ import { SOCKET_EVENTS, IRoomState } from '@proxymity/shared';
 import { useAppStore } from "@/store/useAppStore";
 
 export const useRoomConnection = (roomId: string) => {
-  const setResponse = useAppStore((state) => state.setResponse);
-  const setLoading = useAppStore((state) => state.setLoading);
-  const setRequest = useAppStore((state) => state.setRequest);
-  const setMethod = useAppStore((state) => state.setMethod);
-  const setUrl = useAppStore((state) => state.setUrl);
-  const setBody = useAppStore((state) => state.setBody);
-  const setActiveUsers = useAppStore((state) => state.setActiveUsers);
-  const setHeaders = useAppStore((state) => state.setHeaders);
-  const setQueryParams = useAppStore((state) => state.setQueryParams);
-
   useEffect(() => {
     const onConnect = () => {
       socket.emit(SOCKET_EVENTS.CLIENT.JOIN_ROOM, roomId);
@@ -25,35 +15,37 @@ export const useRoomConnection = (roomId: string) => {
 
     const onSyncState = (roomState: IRoomState) => {
       console.log("Received state from server:", roomState);
-      setRequest(roomState.request);
+      useAppStore.getState().setRequest(roomState.request);
     };
 
     const onBroadcastChange = (updatedData: { field: string, value: any }) => {
       console.log("Received broadcasted change:", updatedData);
+      const store = useAppStore.getState();
       switch (updatedData.field) {
-        case 'method': setMethod(updatedData.value); break;
-        case 'url': setUrl(updatedData.value); break;
-        case 'body': setBody(updatedData.value); break;
-        case 'headers': setHeaders(updatedData.value); break;
-        case 'queryParams': setQueryParams(updatedData.value); break;
-        default: 
+        case 'method': store.setMethod(updatedData.value); break;
+        case 'url': store.setUrl(updatedData.value); break;
+        case 'body': store.setBody(updatedData.value); break;
+        case 'headers': store.setHeaders(updatedData.value); break;
+        case 'queryParams': store.setQueryParams(updatedData.value); break;
+        default:
           console.warn(`Unknown field broadcasted from server: ${updatedData.field}`);
           break;
       }
     };
 
     const onRequestStarted = () => {
-      setLoading(true);
-    }
+      useAppStore.getState().setLoading(true);
+    };
 
     const onRequestComplete = (response: any) => {
-      setResponse(response);
-      setLoading(false);
-    }
+      const store = useAppStore.getState();
+      store.setResponse(response);
+      store.setLoading(false);
+    };
 
     const onUserCount = (count: number) => {
-      setActiveUsers(count);
-    }
+      useAppStore.getState().setActiveUsers(count);
+    };
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
@@ -65,7 +57,7 @@ export const useRoomConnection = (roomId: string) => {
 
     if (socket.connected) {
       onConnect();
-    } 
+    }
 
     return () => {
       socket.off('connect', onConnect);
@@ -79,7 +71,7 @@ export const useRoomConnection = (roomId: string) => {
         socket.emit(SOCKET_EVENTS.CLIENT.LEAVE_ROOM, roomId);
       }
     };
-  }, [roomId, setRequest, setMethod, setUrl, setBody, setHeaders, setQueryParams, setResponse, setLoading, setActiveUsers]);
+  }, [roomId]);
 
   const sendRequest = () => {
     const currentRequest = useAppStore.getState().request;
