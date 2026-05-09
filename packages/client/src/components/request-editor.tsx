@@ -4,6 +4,7 @@ import { useAppStore } from "@/store/useAppStore"
 import Editor, { type BeforeMount } from "@monaco-editor/react"
 import { SOCKET_EVENTS } from "@proxymity/shared"
 import { useSocketEmit } from "@/hooks/useSocketEmit"
+import { useSocketConnected } from "@/hooks/useSocketConnected"
 
 interface RequestEditorProps {
   roomId: string;
@@ -24,6 +25,7 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
   const body = useAppStore((state) => state.request.body);
   const headers = useAppStore((state) => state.request.headers);
   const queryParams = useAppStore((state) => state.request.queryParams);
+  const isConnected = useSocketConnected();
   
   const setBody = useAppStore((state) => state.setBody);
   const addHeader = useAppStore((state) => state.addHeader);
@@ -78,6 +80,7 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
             onUpdate={(id, field, value) => handleParamsChange(() => updateQueryParam(id, field, value))}
             onDelete={(id) => handleParamsChange(() => removeQueryParam(id))}
             placeholder="Query Parameter"
+            disabled={!isConnected}
           />
         </TabsContent>
 
@@ -88,6 +91,7 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
             onUpdate={(id, field, value) => handleHeadersChange(() => updateHeader(id, field, value))}
             onDelete={(id) => handleHeadersChange(() => removeHeader(id))}
             placeholder="Header"
+            disabled={!isConnected}
           />
         </TabsContent>
 
@@ -114,6 +118,7 @@ export function RequestEditor({ roomId }: RequestEditorProps) {
                   formatOnType: true,
                   fontFamily: 'var(--font-mono)',
                   renderLineHighlight: "none",
+                  readOnly: !isConnected,
                   scrollbar: {
                     vertical: "auto",
                     horizontal: "auto",
